@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>قوالب وزارة الاقتصاد والصناعة</title>
+<link rel="icon" type="image/png" href="templates/icon.png">
+<link rel="stylesheet" href="app.css?v=2">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <img class="topbar-logo" src="templates/logo-h-white.png" alt="وزارة الاقتصاد والصناعة">
+    <span class="topbar-divider" aria-hidden="true"></span>
+    <div class="topbar-title">
+      <h1>قوالب وزارة الاقتصاد والصناعة</h1>
+      <p>ارفع الصور، اضبط الكادر، ثم نزّلها جاهزة بالقالب الرسمي</p>
+    </div>
+  </div>
+</header>
+
+<div id="loadError" class="load-error" hidden></div>
+
+<main class="page">
+
+  <section class="step" id="stepPhotos">
+    <div class="step-head">
+      <h2>الصور</h2>
+      <span class="step-note" id="photoCount"></span>
+    </div>
+
+    <label class="dropzone" id="dropzone">
+      <input type="file" id="fileInput" accept="image/*" multiple hidden>
+      <svg class="dz-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0-4.5 4.5M12 4l4.5 4.5M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <strong>اسحب الصور إلى هنا أو اضغط للاختيار</strong>
+      <span>أي قياس — القالب (أفقي، 16:9، ستوري) يُختار تلقائيًا حسب الصورة (حتى 10 صور)</span>
+    </label>
+
+    <div class="toolbar" id="photosToolbar" hidden>
+      <div class="toolbar-group">
+        <span class="toolbar-label">القالب:</span>
+        <div class="seg seg-wrap" id="globalFormat" role="group" aria-label="القالب لكل الصور"></div>
+      </div>
+      <div class="toolbar-group">
+        <span class="toolbar-hint">اسحب الصورة لتحريك الكادر، واسحب ⠿ لتغيير الترتيب</span>
+        <button type="button" class="btn btn-ghost" id="btnClearAll">حذف كل الصور</button>
+      </div>
+    </div>
+
+    <div class="grid" id="grid"></div>
+  </section>
+
+</main>
+
+<!-- التنزيل -->
+<div class="actionbar" id="actionbar" aria-live="polite">
+  <div class="actionbar-inner">
+    <div class="ab-info">
+      <strong id="abSummary"></strong>
+      <span id="abStatus" class="ab-status"></span>
+      <div class="ab-progress"><span id="abProgress"></span></div>
+    </div>
+    <div class="ab-buttons">
+      <button type="button" class="btn btn-gold" id="btnDownload">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0 4.5-4.5M12 15l-4.5-4.5M4 17v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        تنزيل الصور
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script src="app.js?v=2"></script>
+</body>
+</html>
