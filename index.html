@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>قوالب وزارة الصناعة والتجارة الداخلية</title>
-<link rel="icon" type="image/png" href="templates/icon.png">
-<link rel="stylesheet" href="app.css?v=2">
+<link rel="icon" type="image/png" href="templates/icon.png?v=3">
+<link rel="stylesheet" href="app.css?v=3">
 </head>
 <body>
 
 <header class="topbar">
   <div class="topbar-inner">
-    <img class="topbar-logo" src="templates/logo-h-white.png" alt="وزارة الصناعة والتجارة الداخلية">
+    <img class="topbar-logo" src="templates/logo-h-white.png?v=3" alt="وزارة الصناعة والتجارة الداخلية">
     <span class="topbar-divider" aria-hidden="true"></span>
     <div class="topbar-title">
       <h1>قوالب وزارة الصناعة والتجارة الداخلية</h1>
@@ -70,8 +70,36 @@
   </div>
 </div>
 
+<!-- معاينة كبيرة -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="معاينة كبيرة" hidden>
+  <div class="lb-top">
+    <div class="lb-title">
+      <strong id="lbTitle"></strong>
+      <span id="lbMeta"></span>
+    </div>
+    <div class="seg lb-formats" id="lbFormats" role="group" aria-label="القالب"></div>
+    <button type="button" class="lb-close" id="lbClose" title="إغلاق (Esc)" aria-label="إغلاق">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div class="lb-stage" id="lbStage">
+    <button type="button" class="lb-nav lb-prev" id="lbPrev" title="السابقة" aria-label="الصورة السابقة"></button>
+    <canvas id="lbCanvas" aria-label="معاينة كبيرة — اسحب لتحريك الكادر"></canvas>
+    <button type="button" class="lb-nav lb-next" id="lbNext" title="التالية" aria-label="الصورة التالية"></button>
+  </div>
+  <div class="lb-bottom">
+    <div class="zoom lb-zoom">
+      <span aria-hidden="true">−</span>
+      <input type="range" id="lbZoom" min="0.5" max="3" step="0.01" value="1" aria-label="تكبير">
+      <span aria-hidden="true">+</span>
+    </div>
+    <button type="button" class="btn btn-ghost-dark" id="lbReset">إعادة الكادر</button>
+    <button type="button" class="btn btn-gold" id="lbDownload">تنزيل هذه الصورة</button>
+  </div>
+</div>
+
 <div class="toast" id="toast" role="status" hidden></div>
 
-<script src="app.js?v=2"></script>
+<script src="app.js?v=3"></script>
 </body>
 </html>

@@ -10,10 +10,10 @@ const CONFIG = {
 
 // القوالب: ملف PNG شفاف يوضع فوق الصورة بنفس القياس
 const FORMATS = {
-  post:  { w: 1280, h: 853,  overlay: 'templates/post.png',  label: 'أفقي',  size: '1280×853' },
-  wide:  { w: 1920, h: 1080, overlay: 'templates/wide.png',  label: '16:9',  size: '1920×1080' },
-  story: { w: 1080, h: 1920, overlay: 'templates/story.png', label: 'ستوري', size: '1080×1920' },
-  smedc: { w: 1920, h: 1080, overlay: 'templates/smedc.png', label: 'SMEDC', size: '1920×1080',
+  post:  { w: 1280, h: 853,  overlay: 'templates/post.png?v=3',  label: 'أفقي',  size: '1280×853' },
+  wide:  { w: 1920, h: 1080, overlay: 'templates/wide.png?v=3',  label: '16:9',  size: '1920×1080' },
+  story: { w: 1080, h: 1920, overlay: 'templates/story.png?v=3', label: 'ستوري', size: '1080×1920' },
+  smedc: { w: 1920, h: 1080, overlay: 'templates/smedc.png?v=3', label: 'SMEDC', size: '1920×1080',
            hint: 'قالب هيئة تنمية المشروعات الصغيرة والمتوسطة' },
 };
 const FORMAT_KEYS = Object.keys(FORMATS);
@@ -86,6 +86,8 @@ const ICONS = {
   chevRight: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   chevLeft: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   trash: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  expand: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  download: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0 4.5-4.5M12 15l-4.5-4.5M4 17v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
 };
 
 /* =====================================================================
@@ -225,6 +227,7 @@ function buildCard(item) {
     <div class="card-media">
       <canvas aria-label="معاينة الصورة — اسحب لتحريك الكادر"></canvas>
       <span class="badge-num"></span>
+      <button type="button" class="expand" title="معاينة أكبر" aria-label="معاينة أكبر">${ICONS.expand}<span>معاينة أكبر</span></button>
     </div>
     <div class="card-body">
       <div class="card-head">
@@ -244,6 +247,7 @@ function buildCard(item) {
           <span aria-hidden="true">+</span>
         </div>
         <button type="button" class="icon-btn reset" title="إعادة الكادر" aria-label="إعادة الكادر">${ICONS.reset}</button>
+        <button type="button" class="icon-btn dl-one" title="تنزيل هذه الصورة فقط" aria-label="تنزيل هذه الصورة فقط">${ICONS.download}</button>
         <button type="button" class="icon-btn remove" title="حذف الصورة" aria-label="حذف الصورة">${ICONS.trash}</button>
       </div>
     </div>`;
@@ -268,6 +272,9 @@ function buildCard(item) {
     drawCard(item);
   });
   el.querySelector('.remove').addEventListener('click', () => removeItem(item));
+  el.querySelector('.expand').addEventListener('click', () => openLightbox(item));
+  el.querySelector('.dl-one').addEventListener('click', () => downloadOne(item));
+  item.canvas.addEventListener('dblclick', () => openLightbox(item));
   el.querySelector('.move-prev').addEventListener('click', () => moveItem(item, -1));
   el.querySelector('.move-next').addEventListener('click', () => moveItem(item, 1));
   attachReorder(el.querySelector('.grip'), item);
@@ -393,10 +400,142 @@ function attachPan(canvas, getTarget) {
 }
 
 /* =====================================================================
+   المعاينة الكبيرة
+   ===================================================================== */
+const lb = { item: null };
+
+function openLightbox(item) {
+  lb.item = item;
+  const box = $('#lightbox');
+  if (box.hidden) {
+    box.hidden = false;
+    document.body.classList.add('lb-open');
+    lb.opener = document.activeElement;
+  }
+  buildLightboxFormats();
+  drawLightbox();
+  $('#lbClose').focus();
+}
+
+function closeLightbox() {
+  if (!lb.item) return;
+  lb.item = null;
+  $('#lightbox').hidden = true;
+  document.body.classList.remove('lb-open');
+  if (lb.opener && document.contains(lb.opener)) lb.opener.focus();
+}
+
+function buildLightboxFormats() {
+  const box = $('#lbFormats');
+  box.innerHTML = '';
+  for (const key of FORMAT_KEYS) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.dataset.f = key;
+    b.textContent = FORMATS[key].label;
+    b.title = FORMATS[key].hint || FORMATS[key].size;
+    b.addEventListener('click', () => {
+      lb.item.format = key;
+      drawCard(lb.item);
+      drawLightbox();
+    });
+    box.appendChild(b);
+  }
+}
+
+function drawLightbox() {
+  const item = lb.item;
+  if (!item) return;
+  const f = effectiveFormat(item);
+  const F = FORMATS[f];
+  const stage = $('#lbStage');
+  const availW = Math.max(120, stage.clientWidth - 24);
+  const availH = Math.max(120, stage.clientHeight - 24);
+  const css = Math.min(availW / F.w, availH / F.h);       // مقياس العرض على الشاشة
+  const px = Math.min(css * (window.devicePixelRatio || 1), 1);
+  const c = $('#lbCanvas');
+  const cw = Math.round(F.w * px);
+  const ch = Math.round(F.h * px);
+  if (c.width !== cw || c.height !== ch) { c.width = cw; c.height = ch; }
+  c.style.width = `${Math.round(F.w * css)}px`;
+  c.style.height = `${Math.round(F.h * css)}px`;
+  const ctx = c.getContext('2d');
+  ctx.imageSmoothingQuality = 'high';
+  renderPhoto(ctx, item, f, px, px > 0.5 ? item.img : item.preview);
+
+  const i = state.items.indexOf(item);
+  $('#lbTitle').textContent = `الصورة ${i + 1} من ${state.items.length}`;
+  $('#lbMeta').textContent = `${F.label} · ⁦${F.size}⁩`;
+  $('#lbPrev').disabled = i <= 0;
+  $('#lbNext').disabled = i >= state.items.length - 1;
+  $('#lbZoom').value = item.crop[f].zoom;
+  $('#lbFormats').querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.f === f)));
+}
+
+function stepLightbox(delta) {
+  if (!lb.item) return;
+  const j = state.items.indexOf(lb.item) + delta;
+  if (j < 0 || j >= state.items.length) return;
+  lb.item = state.items[j];
+  drawLightbox();
+}
+
+function initLightbox() {
+  $('#lbPrev').innerHTML = ICONS.chevRight;
+  $('#lbNext').innerHTML = ICONS.chevLeft;
+  $('#lbClose').addEventListener('click', closeLightbox);
+  $('#lbPrev').addEventListener('click', () => stepLightbox(-1));
+  $('#lbNext').addEventListener('click', () => stepLightbox(1));
+  $('#lbDownload').addEventListener('click', () => lb.item && downloadOne(lb.item));
+  // الضغط على الخلفية خارج الصورة يغلق المعاينة
+  $('#lbStage').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeLightbox(); });
+
+  $('#lbZoom').addEventListener('input', () => {
+    const item = lb.item;
+    const f = effectiveFormat(item);
+    item.crop[f].zoom = parseFloat($('#lbZoom').value);
+    normalizeCrop(item, item.crop[f], FORMATS[f].w, FORMATS[f].h);
+    drawCard(item);
+    drawLightbox();
+  });
+  $('#lbReset').addEventListener('click', () => {
+    const item = lb.item;
+    item.crop[effectiveFormat(item)] = newCrop();
+    drawCard(item);
+    drawLightbox();
+  });
+  $('#lbCanvas').addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const item = lb.item;
+    const f = effectiveFormat(item);
+    const z = clamp(item.crop[f].zoom * (e.deltaY < 0 ? 1.06 : 1 / 1.06), 0.5, 3);
+    item.crop[f].zoom = z;
+    normalizeCrop(item, item.crop[f], FORMATS[f].w, FORMATS[f].h);
+    drawCard(item);
+    drawLightbox();
+  }, { passive: false });
+
+  attachPan($('#lbCanvas'), () => {
+    const item = lb.item;
+    const f = effectiveFormat(item);
+    return { item, crop: item.crop[f], W: FORMATS[f].w, H: FORMATS[f].h, redraw: () => { drawCard(item); drawLightbox(); } };
+  });
+
+  window.addEventListener('resize', () => { if (lb.item) drawLightbox(); });
+  document.addEventListener('keydown', (e) => {
+    if (!lb.item) return;
+    if (e.key === 'Escape') closeLightbox();
+    else if (e.key === 'ArrowRight') stepLightbox(-1);   // الصفحة من اليمين لليسار
+    else if (e.key === 'ArrowLeft') stepLightbox(1);
+  });
+}
+
+/* =====================================================================
    تحديث الواجهة
    ===================================================================== */
 function refreshUI() {
   const n = state.items.length;
+  if (lb.item && !state.items.includes(lb.item)) closeLightbox();
 
   $('#dropzone').classList.toggle('is-compact', n > 0);
   $('#photosToolbar').hidden = n === 0;
@@ -475,6 +614,23 @@ async function downloadAll() {
   }
 }
 
+async function downloadOne(item) {
+  if (state.busy) return;
+  const out = buildOutputs().find((o) => o.item === item);
+  if (!out) return;
+  setBusy(true);
+  try {
+    await sleep(20);
+    saveBlob(await canvasToBlob(renderOutput(out)), out.file);
+    toast(`تم تنزيل ${out.file} ✓`, 'ok');
+  } catch (err) {
+    console.error(err);
+    toast(exportErrorText(err), 'error');
+  } finally {
+    setBusy(false);
+  }
+}
+
 function exportErrorText(err) {
   if (err && err.name === 'SecurityError') return 'المتصفح منع التصدير: افتح الموقع من الرابط وليس بالنقر المزدوج على الملف';
   return `حدث خطأ: ${err && err.message ? err.message : err}`;
@@ -543,12 +699,14 @@ function initUpload() {
     if (!confirm('حذف كل الصور من الصفحة؟')) return;
     state.items.forEach((item) => { item.el.remove(); URL.revokeObjectURL(item.url); });
     state.items = [];
+    closeLightbox();
     refreshUI();
   });
 }
 
 async function init() {
   initUpload();
+  initLightbox();
   $('#btnDownload').addEventListener('click', downloadAll);
   refreshUI();
 
