@@ -5,7 +5,7 @@
 @font-face { font-family: "Qomra"; src: url("fonts/itfQomraArabic-Bold.otf") format("opentype"); font-weight: 700; font-display: swap; }
 @font-face { font-family: "Qomra"; src: url("fonts/itfQomraArabic-Black.otf") format("opentype"); font-weight: 900; font-display: swap; }
 
-/* ========= الألوان (هوية وزارة الاقتصاد والصناعة) ========= */
+/* ========= الألوان (هوية وزارة الصناعة والتجارة الداخلية) ========= */
 :root {
   --green: #054239;
   --green-deep: #002723;
